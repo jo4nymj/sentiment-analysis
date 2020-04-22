@@ -1,40 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"net/http"
 
-	"code.sentiments/config"
-	"code.sentiments/models"
+	"github.com/gorilla/mux"
+
+	"code.sentiments/services"
 )
 
 func main() {
-	db, err := config.GetMySQLDB()
-	if err != nil {
-		fmt.Println(err)
-	}
+	router := mux.NewRouter()
 
-	reviewModel := models.ReviewModel{
-		Db: db,
-	}
+	router.HandleFunc("/reviews/{id}", services.GetReviews).Methods("GET")
 
-	reviews, err := reviewModel.GetReviews(13)
-	if err != nil {
-		fmt.Println(err)
-	}
-	for _, review := range reviews {
-		fmt.Println("ID: ", review.ID)
-		fmt.Println("Author: ", review.Author)
-		fmt.Println("Content: ", review.Content)
-	}
+	router.HandleFunc("/products/{name}", services.GetProduct).Methods("GET")
 
-	productModel := models.ProductModel{
-		Db: db,
-	}
-	product, err := productModel.GetProduct("NVIDIA")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("ID: ", product.ID)
-	fmt.Println("Name: ", product.Name)
-	fmt.Println("Average_Rating: ", product.Average_Rating)
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
