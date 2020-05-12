@@ -26,3 +26,17 @@ func (r ReviewModel) GetReviews(ID int64) ([]models.Review, error) {
 	}
 	return reviews, nil
 }
+
+func (r ReviewModel) GetReview(ID int64) (models.Review, error) {
+	review := models.Review{}
+	rows, err := r.Db.Query("SELECT comment_ID, comment_author, comment_content FROM wp_comments WHERE comment_type = 'review' AND comment_ID = ?", +ID)
+	if err != nil {
+		return review, err
+	}
+	for rows.Next() {
+		if err := rows.Scan(&review.ID, &review.Author, &review.Content); err != nil {
+			return review, err
+		}
+	}
+	return review, nil
+}
