@@ -8,6 +8,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
 	github.com/golang/protobuf v1.4.0-rc.4
 	github.com/gorilla/mux v1.7.4
+	github.com/sirupsen/logrus v1.6.0
 	google.golang.org/genproto v0.0.0-20200311144346-b662892dd51b
 	google.golang.org/protobuf v1.20.1 // indirect
 )

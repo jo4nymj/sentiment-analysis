@@ -17,7 +17,7 @@ import (
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )
 
-func GetReviews(w http.ResponseWriter, r *http.Request) {
+func ListReviews(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	db, err := config.GetMySQLDB()
@@ -33,10 +33,11 @@ func GetReviews(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	reviews, err := reviewModel.GetReviews(reviewID)
+	reviews, err := reviewModel.ListReviews(reviewID)
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	json.NewEncoder(w).Encode(reviews)
 
 }
@@ -68,7 +69,6 @@ func UpdateAnalysisReviews(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//text := "I'm happy"
 
 	v, err := analyzeSentiment(ctx, client, review.Content)
 	if err != nil {

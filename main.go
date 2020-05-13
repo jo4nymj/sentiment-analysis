@@ -13,7 +13,7 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/reviews/{id}", services.GetReviews).Methods("GET")
+	router.HandleFunc("/reviews/{id}", services.ListReviews).Methods("GET")
 	router.HandleFunc("/reviews/analysis:{id}", services.UpdateAnalysisReviews).Methods("POST")
 
 	router.HandleFunc("/products/{name}", services.GetProduct).Methods("GET")

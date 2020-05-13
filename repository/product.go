@@ -1,18 +1,20 @@
 package repository
 
 import (
-	"database/sql"
+	//"database/sql"
 
+	"code.sentiments/config"
 	"code.sentiments/models"
 )
 
 type ProductModel struct {
-	Db *sql.DB
+	//Db *sql.DB
+	Db *config.Connection
 }
 
 func (r ProductModel) GetProduct(name string) (models.Product, error) {
 	product := models.Product{}
-	rows, err := r.Db.Query("SELECT ID, post_title, average_rating FROM wp_posts p INNER JOIN wp_wc_product_meta_lookup pr ON p.ID = pr.product_id WHERE p.post_title LIKE '%'||?||'%'", name)
+	rows, err := r.Db.Conn.Query("SELECT ID, post_title, average_rating FROM wp_posts p INNER JOIN wp_wc_product_meta_lookup pr ON p.ID = pr.product_id WHERE p.post_title LIKE '%'||?||'%'", name)
 	if err != nil {
 		return product, err
 	}

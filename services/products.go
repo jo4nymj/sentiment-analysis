@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 
 	"code.sentiments/config"
 	"code.sentiments/repository"
@@ -46,18 +47,20 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(product.ID)
+
 	reviewModel := repository.ReviewModel{
 		Db: db,
 	}
-	reviews, err := reviewModel.GetReviews(product.ID)
+	reviews, err := reviewModel.ListReviews(product.ID)
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	var total float32
 	var n float32
 	for _, review := range reviews {
-		total = total + review.Rating
+		log.Info("La puntuación de la review es: ", review.Score)
+		total = total + review.Score
 		n = n + 1
 	}
 
