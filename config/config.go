@@ -6,25 +6,27 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+func init() {
+	if Instance == nil {
+		Instance = GetMySQLDB()
+	}
+}
+
 type Connection struct {
 	Conn *sql.DB
 }
 
 var Instance *Connection
 
-func GetMySQLDB() (connection *Connection, err error) {
+func GetMySQLDB() (connection *Connection) {
 	dbDriver := "mysql"
 	dbUser := "root"
 	dbPass := ""
 	dbName := "project"
 	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
 	if err != nil {
-		return nil, err
+		panic("Failed to initialize the database")
 	}
 
-	return &Connection{Conn: db}, nil
-}
-
-func init() {
-	GetMySQLDB()
+	return &Connection{Conn: db}
 }

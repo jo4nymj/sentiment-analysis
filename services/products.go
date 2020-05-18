@@ -3,10 +3,10 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+
 	"net/http"
 
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 
 	"code.sentiments/config"
 	"code.sentiments/repository"
@@ -15,13 +15,8 @@ import (
 func GetProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	db, err := config.GetMySQLDB()
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	productModel := repository.ProductModel{
-		Db: db,
+		Db: config.Instance,
 	}
 
 	product, err := productModel.GetProduct(mux.Vars(r)["name"])
@@ -35,13 +30,8 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	db, err := config.GetMySQLDB()
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	productModel := repository.ProductModel{
-		Db: db,
+		Db: config.Instance,
 	}
 	product, err := productModel.GetProduct(mux.Vars(r)["name"])
 	if err != nil {
@@ -49,7 +39,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reviewModel := repository.ReviewModel{
-		Db: db,
+		Db: config.Instance,
 	}
 	reviews, err := reviewModel.ListReviews(product.ID)
 	if err != nil {
@@ -59,12 +49,15 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	var total float32
 	var n float32
 	for _, review := range reviews {
-		log.Info("La puntuación de la review es: ", review.Score)
-		total = total + review.Score
+		total = total + review.Rating
 		n = n + 1
 	}
 
 	product.Average_Rating = total / n
+
+	if err := productModel.UpdateProduct(product); err != nil {
+		fmt.Println(err)
+	}
 
 	json.NewEncoder(w).Encode(product)
 }

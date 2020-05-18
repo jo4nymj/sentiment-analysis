@@ -11,4 +11,5 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	google.golang.org/genproto v0.0.0-20200311144346-b662892dd51b
 	google.golang.org/protobuf v1.20.1 // indirect
+	libs.altipla.consulting v1.68.0
 )
