@@ -14,7 +14,8 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/reviews/{id}", services.ListReviews).Methods("GET")
-	router.HandleFunc("/reviews/analysis:{id}", services.UpdateAnalysisReviews).Methods("POST")
+	router.HandleFunc("/reviews/rating/{id}", services.UpdateRatingReview).Methods("POST")
+	router.HandleFunc("/reviews/rating/{id}", services.CreateRatingReview).Methods("PUT")
 
 	router.HandleFunc("/products/{name}", services.GetProduct).Methods("GET")
 	router.HandleFunc("/products/{name}", services.UpdateProduct).Methods("POST")
