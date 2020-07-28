@@ -10,7 +10,27 @@ type ReviewModel struct {
 }
 
 func (r ReviewModel) ListReviews(ID int64) ([]models.Review, error) {
-	rows, err := r.Db.Conn.Query(`SELECT comments.comment_ID, comment_author, comment_content, meta_value, meta_magnitude
+	rows, err := r.Db.Conn.Query(`SELECT comments.comment_ID, comment_author, comment_content, meta_value
+	 FROM wp_comments comments INNER JOIN wp_commentmeta meta ON comments.comment_ID = meta.comment_ID
+	 WHERE comment_type = 'review' AND meta.meta_key = 'verified' AND comment_post_ID = ?`, +ID)
+	if err != nil {
+		return nil, err
+	}
+
+	reviews := []models.Review{}
+	review := models.Review{}
+	for rows.Next() {
+		if err := rows.Scan(&review.ID, &review.Author, &review.Content, &review.Rating); err != nil {
+			return nil, err
+		}
+		reviews = append(reviews, review)
+	}
+
+	return reviews, nil
+}
+
+func (r ReviewModel) ListAnalyzedReviews(ID int64) ([]models.Review, error) {
+	rows, err := r.Db.Conn.Query(`SELECT comments.comment_ID
 	 FROM wp_comments comments INNER JOIN wp_commentmeta meta ON comments.comment_ID = meta.comment_ID
 	 WHERE comment_type = 'review' AND meta.meta_key = 'rating' AND comment_post_ID = ?`, +ID)
 	if err != nil {
@@ -20,7 +40,7 @@ func (r ReviewModel) ListReviews(ID int64) ([]models.Review, error) {
 	reviews := []models.Review{}
 	review := models.Review{}
 	for rows.Next() {
-		if err := rows.Scan(&review.ID, &review.Author, &review.Content, &review.Rating, &review.Magnitude); err != nil {
+		if err := rows.Scan(&review.ID); err != nil {
 			return nil, err
 		}
 		reviews = append(reviews, review)

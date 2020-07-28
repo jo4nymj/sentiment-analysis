@@ -3,99 +3,199 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	//"io/ioutil"
 	"net/http"
 	"strconv"
 
 	//"github.com/golang/protobuf/proto"
-	"github.com/gorilla/mux"
-	"libs.altipla.consulting/errors"
-
 	language "cloud.google.com/go/language/apiv1"
+	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
+	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
+
 	"code.sentiments/config"
+	"code.sentiments/logger"
 	"code.sentiments/models"
 	"code.sentiments/repository"
-	//log "github.com/sirupsen/logrus"
-	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )
 
 func ListReviews(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	reviewModel := repository.ReviewModel{
 		Db: config.Instance,
 	}
 
-	reviewID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
+	productID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
 	if err != nil {
-		errors.Trace(err)
-		return
+		logger.Error("Failed to parse the product ID, ", err)
+		log.Errorf("Failed to parse the product ID, %v", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 Something bad happened!"))
 	}
-	reviews, err := reviewModel.ListReviews(reviewID)
+	reviews, err := reviewModel.ListReviews(productID)
 	if err != nil {
-		errors.Trace(err)
-		return
+		logger.Error("Failed to list the reviews, ", err)
+		log.Errorf("Failed to list the reviews, %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Something bad happened!"))
 	}
 
 	json.NewEncoder(w).Encode(reviews)
-
 }
 
 func CreateRatingReview(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	reviewModel := repository.ReviewModel{
 		Db: config.Instance,
 	}
 
 	reviewID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error("Failed to parse the ID of the review, ", err)
+		log.Errorf("Failed to parse the ID of the review, %v", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 Something bad happened!"))
 	}
 
 	review, err := reviewModel.GetReview(reviewID)
 	if err != nil {
-		fmt.Println("Fallo al hacer get de la review: ", err)
+		logger.Error("Failed to retrieve the review from the database, ", err)
+		log.Errorf("Failed to retrieve the review from the database: %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Something bad happened!"))
 	}
 
 	if err := analyze(&review); err != nil {
-		fmt.Println("Error al llamar a la API de Google")
+		logger.Error("Failed to analyze the review, ", err)
+		log.Errorf("Failed to analyze the review: %v", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 Something bad happened!"))
 	}
 
 	if err := reviewModel.CreateReview(review); err != nil {
-		fmt.Println("Fallo en el create: ", err)
+		logger.Error("Failed to create review: %v", err)
+		log.Errorf("Failed to create review: %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Something bad happened!"))
 	}
 
 	json.NewEncoder(w).Encode(review)
 }
 
 func UpdateRatingReview(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	reviewModel := repository.ReviewModel{
 		Db: config.Instance,
 	}
 
 	reviewID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error("Failed to parse the ID of the review, ", err)
+		log.Errorf("Failed to parse the ID of the review, %v", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 Something bad happened!"))
 	}
 
 	review, err := reviewModel.GetReview(reviewID)
 	if err != nil {
-		fmt.Println("Fallo al hacer get de la review: ", err)
+		logger.Error("Failed to retrieve the review from the database, ", err)
+		log.Errorf("Failed to retrieve the review from the database: %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Something bad happened!"))
 	}
 
 	if err := analyze(&review); err != nil {
-		fmt.Println("Error al llamar a la API de Google")
+		logger.Error("Failed to analyze the review, ", err)
+		log.Errorf("Failed to analyze the review: %v", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 Something bad happened!"))
 	}
 
 	if err := reviewModel.UpdateReview(review); err != nil {
-		fmt.Println("Fallo en el update: ", err)
+		logger.Error("Failed to update review: %v", err)
+		log.Errorf("Failed to update review: %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Something bad happened!"))
 	}
 
 	json.NewEncoder(w).Encode(review)
+}
+
+func CreateRatingReviewCron(w http.ResponseWriter, r *http.Request) {
+	productModel := repository.ProductModel{
+		Db: config.Instance,
+	}
+
+	products, err := productModel.ListProducts()
+	if err != nil {
+		logger.Error("Failed to list products, ", err)
+		log.Errorf("Failed to list products, %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("400 Something bad happened!"))
+	}
+
+	reviewModel := repository.ReviewModel{
+		Db: config.Instance,
+	}
+
+	for _, product := range products {
+		reviews, err := reviewModel.ListReviews(product.ID)
+		if err != nil {
+			logger.Error("Failed to list reviews, ", err)
+			log.Errorf("Failed to list reviews, %v", err)
+
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("400 Something bad happened!"))
+		}
+
+		analyzedReviews, err := reviewModel.ListAnalyzedReviews(product.ID)
+		if err != nil {
+			logger.Error("Failed to list analyzed reviews, ", err)
+			log.Errorf("Failed to list analyzed reviews, %v", err)
+
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("400 Something bad happened!"))
+		}
+
+		for _, review := range reviews {
+			broke := false
+			for _, analyzedReview := range analyzedReviews {
+				if review.ID == analyzedReview.ID {
+					broke = true
+					break
+				}
+			}
+			if broke {
+				continue
+			}
+
+			if err := analyze(&review); err != nil {
+				logger.Error("Failed to analyze the review, ", err)
+				log.Errorf("Failed to analyze the review: %v", err)
+
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("500 Something bad happened!"))
+			}
+
+			if err := reviewModel.CreateReview(review); err != nil {
+				logger.Error("Failed to create review: %v", err)
+				log.Errorf("Failed to create review: %v", err)
+
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("400 Something bad happened!"))
+			}
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("200 All reviews have been evaluated succesfully"))
 }
 
 func analyze(review *models.Review) error {

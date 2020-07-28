@@ -3,13 +3,16 @@ module code.sentiments
 go 1.13
 
 require (
-	cloud.google.com/go v0.54.0
+	cloud.google.com/go v0.61.0
+	cloud.google.com/go/logging v1.0.0
+	github.com/GoogleCloudPlatform/cloudsql-proxy v1.17.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
-	github.com/golang/protobuf v1.4.0-rc.4
+	github.com/golang/protobuf v1.4.2
+	github.com/google/go-cmp v0.5.1 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/sirupsen/logrus v1.6.0
-	google.golang.org/genproto v0.0.0-20200311144346-b662892dd51b
-	google.golang.org/protobuf v1.20.1 // indirect
+	golang.org/x/sys v0.0.0-20200728102440-3e129f6d46b1 // indirect
+	google.golang.org/genproto v0.0.0-20200728010541-3dc8dca74b7b
 	libs.altipla.consulting v1.68.0
 )

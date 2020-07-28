@@ -1,24 +1,12 @@
 FROM golang:1.13
 
-# Copy gcp credentials json
-ENV GOOGLE_APPLICATION_CREDENTIALS /workspace/auth/client_secret.json
+ENV PORT 5002
 
-# Move to working directory
+RUN mkdir /app
 WORKDIR /app/
-
-# Copy and download dependency using go mod
-COPY go.mod .
-COPY go.sum . 
-RUN go mod download
-
-# Copy the code into the container
 COPY . .
 
-# Adds credentials
-ADD ./creds.json $GOOGLE_APPLICATION_CREDENTIALS
+RUN go mod download && \
+    go install .
 
-# Build the application
-RUN go build -o main.go .
-
-# Execute main
-ENTRYPOINT ["/main"]
+CMD ["code.sentiments"]

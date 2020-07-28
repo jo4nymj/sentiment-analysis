@@ -38,3 +38,21 @@ func (r ProductModel) UpdateProduct(product models.Product) error {
 
 	return nil
 }
+
+func (r ProductModel) ListProducts() ([]models.Product, error) {
+	rows, err := r.Db.Conn.Query(`SELECT ID, post_title, average_rating 
+		FROM wp_posts p INNER JOIN wp_wc_product_meta_lookup pr ON p.ID = pr.product_id`)
+	if err != nil {
+		return nil, err
+	}
+	products := []models.Product{}
+	product := models.Product{}
+	for rows.Next() {
+		if err := rows.Scan(&product.ID, &product.Name, &product.Average_Rating); err != nil {
+			return nil, err
+		}
+		products = append(products, product)
+	}
+
+	return products, nil
+}
