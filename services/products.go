@@ -9,6 +9,7 @@ import (
 	"code.sentiments/config"
 	"code.sentiments/logger"
 	"code.sentiments/repository"
+	"code.sentiments/utilities"
 )
 
 func GetProduct(w http.ResponseWriter, r *http.Request) {
@@ -20,8 +21,7 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error("Failed to retrieve the product from database, %v", err)
 
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("400 Something bad happened!"))
+		utilities.StatusBadRequest(w, r)
 	}
 	json.NewEncoder(w).Encode(product)
 
@@ -35,8 +35,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error("Failed to retrieve the product from database, %v", err)
 
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("400 Something bad happened!"))
+		utilities.StatusBadRequest(w, r)
 	}
 
 	reviewModel := repository.ReviewModel{
@@ -46,8 +45,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error("Failed to retrieve the review from database, %v", err)
 
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("400 Something bad happened!"))
+		utilities.StatusBadRequest(w, r)
 	}
 
 	var total float32
@@ -61,8 +59,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	if err := productModel.UpdateProduct(product); err != nil {
 		logger.Error("Failed to update the product %v", err)
 
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("400 Something bad happened!"))
+		utilities.StatusBadRequest(w, r)
 	}
 
 	json.NewEncoder(w).Encode(product)
