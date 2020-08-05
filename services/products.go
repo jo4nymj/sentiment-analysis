@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 
 	"code.sentiments/config"
 	"code.sentiments/logger"
@@ -19,8 +18,7 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 
 	product, err := productModel.GetProduct(mux.Vars(r)["name"])
 	if err != nil {
-		logger.Error("Failed to retrieve the product from database, ", err)
-		log.Errorf("Failed to retrieve the product from database, %v", err)
+		logger.Error("Failed to retrieve the product from database, %v", err)
 
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("400 Something bad happened!"))
@@ -35,8 +33,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	product, err := productModel.GetProduct(mux.Vars(r)["name"])
 	if err != nil {
-		logger.Error("Failed to retrieve the product from database, ", err)
-		log.Errorf("Failed to retrieve the product from database, %v", err)
+		logger.Error("Failed to retrieve the product from database, %v", err)
 
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("400 Something bad happened!"))
@@ -47,8 +44,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	reviews, err := reviewModel.ListReviews(product.ID)
 	if err != nil {
-		logger.Error("Failed to retrieve the review from database, ", err)
-		log.Errorf("Failed to retrieve the review from database, %v", err)
+		logger.Error("Failed to retrieve the review from database, %v", err)
 
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("400 Something bad happened!"))
@@ -63,8 +59,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	product.Average_Rating = total / n
 
 	if err := productModel.UpdateProduct(product); err != nil {
-		logger.Error("Failed to update the product ", err)
-		log.Errorf("Failed to update the product, %v", err)
+		logger.Error("Failed to update the product %v", err)
 
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("400 Something bad happened!"))

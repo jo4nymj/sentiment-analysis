@@ -21,39 +21,39 @@ type Connection struct {
 var Instance *Connection
 
 func GetMySQLDB() (connection *Connection) {
-	/*
-		var (
-			dbUser                 = mustGetenv("DB_USER")
-			dbPwd                  = mustGetenv("DB_PWD")
-			instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME")
-			dbName                 = mustGetenv("DB_NAME")
-		)
+	var (
+		dbUser                 = MustGetenv("DB_USER")
+		dbPwd                  = MustGetenv("DB_PWD")
+		instanceConnectionName = MustGetenv("INSTANCE_CONNECTION_NAME")
+		dbName                 = MustGetenv("DB_NAME")
+	)
 
-		var dbURI string
-		dbURI = fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/%s", dbUser, dbPwd, instanceConnectionName, dbName)
+	var dbURI string
+	dbURI = fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/%s", dbUser, dbPwd, instanceConnectionName, dbName)
 
-		dbPool, err := sql.Open("mysql", dbURI)
-		if err != nil {
-			fmt.Printf("Cannot access to database")
-			//fmt.Errorf("sql.Open: %v", err)
-			return nil
-		}
-
-		return &Connection{Conn: dbPool}
-	*/
-	dbDriver := "mysql"
-	dbUser := "root"
-	dbPass := ""
-	dbName := "project"
-	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
+	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
-		panic("Failed to initialize the database")
+		fmt.Printf("Cannot access to database")
+		//fmt.Errorf("sql.Open: %v", err)
+		return nil
 	}
 
-	return &Connection{Conn: db}
+	return &Connection{Conn: dbPool}
+	/*
+		dbDriver := "mysql"
+		dbUser := "root"
+		dbPass := ""
+		dbName := "project"
+		db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
+		if err != nil {
+			panic("Failed to initialize the database")
+		}
+
+		return &Connection{Conn: db}
+	*/
 }
 
-func mustGetenv(k string) string {
+func MustGetenv(k string) string {
 	v := os.Getenv(k)
 	if v == "" {
 		fmt.Printf("Warning: %s environment variable not set.\n", k)
