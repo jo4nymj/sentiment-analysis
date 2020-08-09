@@ -8,7 +8,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var IsProduction bool
+
 func init() {
+	if MustGetenv("PRODUCTION") == "true" {
+		IsProduction = true
+	}
+
 	if Instance == nil {
 		Instance = GetMySQLDB()
 	}
@@ -21,7 +27,7 @@ type Connection struct {
 var Instance *Connection
 
 func GetMySQLDB() (connection *Connection) {
-	/*
+	if IsProduction {
 		var (
 			dbUser                 = MustGetenv("DB_USER")
 			dbPwd                  = MustGetenv("DB_PWD")
@@ -34,13 +40,12 @@ func GetMySQLDB() (connection *Connection) {
 
 		dbPool, err := sql.Open("mysql", dbURI)
 		if err != nil {
-			fmt.Printf("Cannot access to database")
-			//fmt.Errorf("sql.Open: %v", err)
-			return nil
+			panic("Failed to initialize the database")
 		}
 
 		return &Connection{Conn: dbPool}
-	*/
+	}
+
 	dbDriver := "mysql"
 	dbUser := "root"
 	dbPass := ""
@@ -51,7 +56,6 @@ func GetMySQLDB() (connection *Connection) {
 	}
 
 	return &Connection{Conn: db}
-
 }
 
 func MustGetenv(k string) string {

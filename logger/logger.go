@@ -10,12 +10,7 @@ import (
 	"code.sentiments/config"
 )
 
-var isProduction = false
-
 func init() {
-	if config.MustGetenv("PRODUCTION") == "true" {
-		isProduction = true
-	}
 	loggingClient, err := stackdriverClient()
 	if err != nil {
 		log.Fatal("Failed creating the logger client")
@@ -26,7 +21,7 @@ func init() {
 var Logger *logging.Logger
 
 func Print(message string, args ...interface{}) {
-	if isProduction {
+	if config.IsProduction {
 		Logger.StandardLogger(logging.Info).Println(message, args)
 	} else {
 		log.Println(message, args)
@@ -34,7 +29,7 @@ func Print(message string, args ...interface{}) {
 }
 
 func Error(message string, args ...interface{}) {
-	if isProduction {
+	if config.IsProduction {
 		Logger.StandardLogger(logging.Error).Println(message, args)
 	} else {
 		log.Errorf(message, args...)

@@ -20,8 +20,7 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 	product, err := productModel.GetProduct(mux.Vars(r)["name"])
 	if err != nil {
 		logger.Error("Failed to retrieve the product from database, %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 	json.NewEncoder(w).Encode(product)
 
@@ -34,8 +33,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	product, err := productModel.GetProduct(mux.Vars(r)["name"])
 	if err != nil {
 		logger.Error("Failed to retrieve the product from database, %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 
 	reviewModel := repository.ReviewModel{
@@ -44,8 +42,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	reviews, err := reviewModel.ListReviews(product.ID)
 	if err != nil {
 		logger.Error("Failed to retrieve the review from database, %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 
 	var total float32
@@ -58,13 +55,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	if err := productModel.UpdateProduct(product); err != nil {
 		logger.Error("Failed to update the product %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 
 	json.NewEncoder(w).Encode(product)
-}
-
-func GetFoo(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode("Hola Mundo")
 }

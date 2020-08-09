@@ -4,9 +4,13 @@ import (
 	"net/http"
 )
 
-func StatusBadRequest(w http.ResponseWriter, r *http.Request) {
+func StatusBadRequest(w http.ResponseWriter, r *http.Request, message string) {
 	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte("400 Something bad happened!"))
+	if message == "" {
+		w.Write([]byte("400 Something bad happened!"))
+		return
+	}
+	w.Write([]byte("400 " + message))
 }
 
 func StatusOK(w http.ResponseWriter, r *http.Request) {

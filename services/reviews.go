@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	//"github.com/golang/protobuf/proto"
 	language "cloud.google.com/go/language/apiv1"
 	"github.com/gorilla/mux"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
@@ -26,15 +25,13 @@ func ListReviews(w http.ResponseWriter, r *http.Request) {
 	productID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
 	if err != nil {
 		logger.Error("Failed to parse the product ID, %v", err)
-
 		utilities.StatusInternalServerError(w, r)
 	}
 
 	reviews, err := reviewModel.ListReviews(productID)
 	if err != nil {
 		logger.Error("Failed to list the reviews, %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 
 	json.NewEncoder(w).Encode(reviews)
@@ -48,27 +45,34 @@ func CreateRatingReview(w http.ResponseWriter, r *http.Request) {
 	reviewID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
 	if err != nil {
 		logger.Error("Failed to parse the ID of the review, %v", err)
-
 		utilities.StatusInternalServerError(w, r)
+	}
+
+	exists, err := reviewModel.Exists(reviewID)
+	if err != nil {
+		logger.Error("Failed to retrieve the review from the database, %v", err)
+		utilities.StatusBadRequest(w, r, "")
+	}
+
+	if exists {
+		utilities.StatusBadRequest(w, r, "Review already exists")
+		return
 	}
 
 	review, err := reviewModel.GetReview(reviewID)
 	if err != nil {
 		logger.Error("Failed to retrieve the review from the database, %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 
 	if err := analyze(&review); err != nil {
 		logger.Error("Failed to analyze the review, %v", err)
-
 		utilities.StatusInternalServerError(w, r)
 	}
 
 	if err := reviewModel.CreateReview(review); err != nil {
 		logger.Error("Failed to create review: %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 
 	json.NewEncoder(w).Encode(review)
@@ -82,90 +86,26 @@ func UpdateRatingReview(w http.ResponseWriter, r *http.Request) {
 	reviewID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
 	if err != nil {
 		logger.Error("Failed to parse the ID of the review, %v", err)
-
 		utilities.StatusInternalServerError(w, r)
 	}
 
 	review, err := reviewModel.GetReview(reviewID)
 	if err != nil {
 		logger.Error("Failed to retrieve the review from the database, %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 
 	if err := analyze(&review); err != nil {
 		logger.Error("Failed to analyze the review, %v", err)
-
 		utilities.StatusInternalServerError(w, r)
 	}
 
 	if err := reviewModel.UpdateReview(review); err != nil {
 		logger.Error("Failed to update review: %v", err)
-
-		utilities.StatusBadRequest(w, r)
+		utilities.StatusBadRequest(w, r, "")
 	}
 
 	json.NewEncoder(w).Encode(review)
-}
-
-func CreateRatingReviewCron(w http.ResponseWriter, r *http.Request) {
-	productModel := repository.ProductModel{
-		Db: config.Instance,
-	}
-
-	products, err := productModel.ListProducts()
-	if err != nil {
-		logger.Error("Failed to list products, %v", err)
-
-		utilities.StatusBadRequest(w, r)
-	}
-
-	reviewModel := repository.ReviewModel{
-		Db: config.Instance,
-	}
-
-	for _, product := range products {
-		reviews, err := reviewModel.ListReviews(product.ID)
-		if err != nil {
-			logger.Error("Failed to list reviews, %v", err)
-
-			utilities.StatusBadRequest(w, r)
-		}
-
-		analyzedReviews, err := reviewModel.ListAnalyzedReviews(product.ID)
-		if err != nil {
-			logger.Error("Failed to list analyzed reviews, %v", err)
-
-			utilities.StatusBadRequest(w, r)
-		}
-
-		for _, review := range reviews {
-			broke := false
-			for _, analyzedReview := range analyzedReviews {
-				if review.ID == analyzedReview.ID {
-					broke = true
-					break
-				}
-			}
-			if broke {
-				continue
-			}
-
-			if err := analyze(&review); err != nil {
-				logger.Error("Failed to analyze the review, %v", err)
-
-				utilities.StatusInternalServerError(w, r)
-			}
-
-			if err := reviewModel.CreateReview(review); err != nil {
-				logger.Error("Failed to create review: %v", err)
-
-				utilities.StatusBadRequest(w, r)
-			}
-		}
-	}
-
-	utilities.StatusOK(w, r)
 }
 
 func analyze(review *models.Review) error {
