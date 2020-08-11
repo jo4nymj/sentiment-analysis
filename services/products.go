@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"code.sentiments/config"
+	"code.sentiments/database"
 	"code.sentiments/logger"
 	"code.sentiments/repository"
 	"code.sentiments/utilities"
@@ -14,7 +14,7 @@ import (
 
 func GetProduct(w http.ResponseWriter, r *http.Request) {
 	productModel := repository.ProductModel{
-		Db: config.Instance,
+		Db: database.Instance,
 	}
 
 	product, err := productModel.GetProduct(mux.Vars(r)["name"])
@@ -28,7 +28,7 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 
 func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	productModel := repository.ProductModel{
-		Db: config.Instance,
+		Db: database.Instance,
 	}
 	product, err := productModel.GetProduct(mux.Vars(r)["name"])
 	if err != nil {
@@ -37,7 +37,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reviewModel := repository.ReviewModel{
-		Db: config.Instance,
+		Db: database.Instance,
 	}
 	reviews, err := reviewModel.ListReviews(product.ID)
 	if err != nil {

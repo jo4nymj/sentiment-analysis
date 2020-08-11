@@ -10,6 +10,8 @@ import (
 	"code.sentiments/config"
 )
 
+var Logger *logging.Logger
+
 func init() {
 	loggingClient, err := stackdriverClient()
 	if err != nil {
@@ -17,8 +19,6 @@ func init() {
 	}
 	Logger = loggingClient.Logger("sentiments-log")
 }
-
-var Logger *logging.Logger
 
 func Print(message string, args ...interface{}) {
 	if config.IsProduction {

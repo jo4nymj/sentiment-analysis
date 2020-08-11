@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 
-	"code.sentiments/config"
+	"code.sentiments/database"
 	"code.sentiments/logger"
 	"code.sentiments/models"
 	"code.sentiments/repository"
@@ -19,7 +19,7 @@ import (
 
 func ListReviews(w http.ResponseWriter, r *http.Request) {
 	reviewModel := repository.ReviewModel{
-		Db: config.Instance,
+		Db: database.Instance,
 	}
 
 	productID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
@@ -39,7 +39,7 @@ func ListReviews(w http.ResponseWriter, r *http.Request) {
 
 func CreateRatingReview(w http.ResponseWriter, r *http.Request) {
 	reviewModel := repository.ReviewModel{
-		Db: config.Instance,
+		Db: database.Instance,
 	}
 
 	reviewID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)
@@ -80,7 +80,7 @@ func CreateRatingReview(w http.ResponseWriter, r *http.Request) {
 
 func UpdateRatingReview(w http.ResponseWriter, r *http.Request) {
 	reviewModel := repository.ReviewModel{
-		Db: config.Instance,
+		Db: database.Instance,
 	}
 
 	reviewID, err := strconv.ParseInt((mux.Vars(r)["id"]), 10, 64)

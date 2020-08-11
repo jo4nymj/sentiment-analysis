@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"code.sentiments/config"
+	"code.sentiments/database"
 	"code.sentiments/models"
 )
 
 type ReviewModel struct {
-	Db *config.Connection
+	Db *database.Connection
 }
 
 func (r ReviewModel) ListReviews(ID int64) ([]models.Review, error) {

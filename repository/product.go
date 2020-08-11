@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"code.sentiments/config"
+	"code.sentiments/database"
 	"code.sentiments/models"
 )
 
 type ProductModel struct {
-	Db *config.Connection
+	Db *database.Connection
 }
 
 func (r ProductModel) GetProduct(name string) (models.Product, error) {
